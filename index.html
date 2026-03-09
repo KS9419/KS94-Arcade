@@ -1,0 +1,1007 @@
+<html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MY ARCADE</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&amp;family=Share+Tech+Mono&amp;family=Rajdhani:wght@300;400;600;700&amp;display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #04040e;
+    --surface: #0a0a1c;
+    --surface2: #0f0f24;
+    --border: #16163a;
+    --border2: #22225a;
+    --cyan: #00f0ff;
+    --pink: #ff0090;
+    --yellow: #ffe600;
+    --green: #00ff99;
+    --purple: #9966ff;
+    --text: #dde0ff;
+    --muted: #4a4a7a;
+    --muted2: #7a7aaa;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: 'Rajdhani', sans-serif; min-height: 100vh; overflow-x: hidden; }
+
+  .bg-grid {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image: linear-gradient(rgba(0,240,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(0,240,255,0.025) 1px, transparent 1px);
+    background-size: 44px 44px;
+  }
+  .bg-glow {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background: radial-gradient(ellipse 60% 40% at 20% 10%, rgba(0,240,255,0.06) 0%, transparent 70%), radial-gradient(ellipse 50% 30% at 80% 80%, rgba(255,0,144,0.06) 0%, transparent 70%);
+  }
+  .scanlines {
+    position: fixed; inset: 0; z-index: 500; pointer-events: none;
+    background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.1) 3px, rgba(0,0,0,0.1) 4px);
+  }
+
+  .wrap { position: relative; z-index: 1; max-width: 1180px; margin: 0 auto; padding: 0 28px; }
+
+  /* HEADER */
+  header { position: sticky; top: 0; z-index: 200; background: rgba(4,4,14,0.93); backdrop-filter: blur(14px); border-bottom: 1px solid var(--border); }
+  .header-inner { display: flex; align-items: center; justify-content: space-between; padding: 18px 0; }
+  .site-logo { font-family: 'Orbitron', monospace; font-weight: 900; font-size: 1.35rem; letter-spacing: 5px; color: var(--cyan); text-shadow: 0 0 18px var(--cyan), 0 0 36px rgba(0,240,255,0.25); text-decoration: none; }
+  .site-logo .acc { color: var(--pink); text-shadow: 0 0 18px var(--pink); }
+
+  /* BUTTONS */
+  .btn { font-family: 'Orbitron', monospace; font-size: 0.62rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 9px 18px; border: none; cursor: pointer; clip-path: polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%); transition: all 0.18s; white-space: nowrap; }
+  .btn-cyan { background: transparent; color: var(--cyan); outline: 1px solid var(--cyan); outline-offset: -1px; }
+  .btn-cyan:hover { background: rgba(0,240,255,0.12); box-shadow: 0 0 20px rgba(0,240,255,0.3); }
+  .btn-pink { background: var(--pink); color: #000; }
+  .btn-pink:hover { background: #ff33aa; box-shadow: 0 0 24px rgba(255,0,144,0.55); transform: translateY(-1px); }
+  .btn-green { background: var(--green); color: #000; }
+  .btn-green:hover { background: #33ffaa; box-shadow: 0 0 24px rgba(0,255,153,0.55); transform: translateY(-1px); }
+  .btn-yellow { background: var(--yellow); color: #000; }
+  .btn-yellow:hover { background: #ffee33; box-shadow: 0 0 24px rgba(255,230,0,0.55); transform: translateY(-1px); }
+  .btn-ghost { background: transparent; color: var(--muted2); outline: 1px solid var(--border2); outline-offset: -1px; }
+  .btn-ghost:hover { color: var(--text); outline-color: var(--muted2); }
+  .btn-danger { background: transparent; color: #ff4466; outline: 1px solid rgba(255,68,102,0.4); outline-offset: -1px; }
+  .btn-danger:hover { background: rgba(255,68,102,0.12); }
+  .btn-sm { font-size: 0.55rem; padding: 6px 12px; }
+
+  /* HERO */
+  .hero { padding: 72px 0 52px; text-align: center; }
+  .hero-eyebrow { font-family: 'Share Tech Mono', monospace; font-size: 0.72rem; letter-spacing: 5px; color: var(--green); text-transform: uppercase; margin-bottom: 18px; }
+  .hero-eyebrow::before { content: '▶ '; }
+  .hero h1 { font-family: 'Orbitron', monospace; font-weight: 900; font-size: clamp(2.4rem,6vw,4.5rem); line-height: 1.05; letter-spacing: -1px; margin-bottom: 18px; }
+  .hero h1 .l1 { display: block; color: #fff; }
+  .hero h1 .l2 { display: block; color: var(--cyan); text-shadow: 0 0 28px var(--cyan), 0 0 56px rgba(0,240,255,0.3); }
+  .hero-sub { font-size: 1.05rem; color: var(--muted2); max-width: 440px; margin: 0 auto; line-height: 1.7; font-weight: 300; }
+
+  /* UPDATE BANNER */
+  .update-banner { border: 1px solid var(--border2); background: var(--surface); padding: 12px 18px; margin-bottom: 36px; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; animation: cardIn 0.4s ease both; position: relative; }
+  .update-banner::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--muted); opacity: 0.5; }
+  .update-banner-inner { display: flex; align-items: flex-start; gap: 12px; min-width: 0; }
+  .update-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted2); flex-shrink: 0; margin-top: 6px; }
+  .update-content { min-width: 0; }
+  .update-label { font-family: 'Share Tech Mono', monospace; font-size: 0.6rem; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; margin-bottom: 4px; }
+  .update-text { font-size: 0.88rem; color: var(--muted2); line-height: 1.6; font-weight: 300; }
+  .update-close { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 0.75rem; flex-shrink: 0; padding: 2px 4px; transition: color 0.15s; line-height: 1; margin-top: 2px; }
+  .update-close:hover { color: var(--text); }
+
+  /* COUNT + FILTERS */
+  .section { padding: 24px 0 80px; }
+  .top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 14px; }
+  .game-count { font-family: 'Share Tech Mono', monospace; font-size: 0.75rem; color: var(--muted2); letter-spacing: 3px; }
+  .game-count span { color: var(--cyan); font-size: 1.1rem; }
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; letter-spacing: 2px; text-transform: uppercase; padding: 6px 14px; background: transparent; border: 1px solid var(--border2); color: var(--muted2); cursor: pointer; transition: all 0.15s; }
+  .chip:hover, .chip.active { border-color: var(--cyan); color: var(--cyan); background: rgba(0,240,255,0.07); box-shadow: 0 0 12px rgba(0,240,255,0.15); }
+
+  /* GRID */
+  .game-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px,1fr)); gap: 18px; }
+
+  /* CARD */
+  .card { background: var(--surface); border: 1px solid var(--border); position: relative; overflow: hidden; transition: transform 0.22s, border-color 0.22s, box-shadow 0.22s; animation: cardIn 0.45s ease both; display: flex; flex-direction: column; }
+  @keyframes cardIn { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+  .card:hover { border-color: var(--cyan); box-shadow: 0 0 28px rgba(0,240,255,0.13), 0 8px 32px rgba(0,0,0,0.5); transform: translateY(-5px); }
+  .card-stripe { height: 3px; background: linear-gradient(90deg, var(--pink), var(--cyan), var(--green)); transform: scaleX(0); transform-origin: left; transition: transform 0.3s; }
+  .card:hover .card-stripe { transform: scaleX(1); }
+  .card-art { aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; font-size: 4.5rem; background: var(--surface2); position: relative; overflow: hidden; flex-shrink: 0; }
+  .card-art-glow { position: absolute; inset: 0; opacity: 0.18; background: radial-gradient(circle at 50% 60%, var(--gc, #00f0ff), transparent 65%); transition: opacity 0.3s; }
+  .card:hover .card-art-glow { opacity: 0.32; }
+  .card-art-emoji { position: relative; z-index: 1; filter: drop-shadow(0 0 18px var(--gc, #00f0ff)); }
+  .card-body { padding: 16px 18px 18px; display: flex; flex-direction: column; flex: 1; }
+  .card-genre { font-family: 'Share Tech Mono', monospace; font-size: 0.6rem; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 8px; }
+  .card-title { font-family: 'Orbitron', monospace; font-size: 0.95rem; font-weight: 700; letter-spacing: 1px; color: #fff; margin-bottom: 8px; line-height: 1.3; }
+  .card-desc { font-size: 0.82rem; color: var(--muted2); line-height: 1.65; font-weight: 300; margin-bottom: 18px; flex: 1; }
+  .card-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 14px; border-top: 1px solid var(--border); gap: 10px; }
+  .card-by { font-family: 'Share Tech Mono', monospace; font-size: 0.62rem; color: var(--muted); letter-spacing: 1px; }
+  .play-btn { font-family: 'Orbitron', monospace; font-size: 0.58rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; padding: 8px 16px; background: var(--pink); color: #000; border: none; cursor: pointer; text-decoration: none; display: inline-block; clip-path: polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%); transition: all 0.18s; white-space: nowrap; flex-shrink: 0; }
+  .play-btn:hover { background: #ff33aa; box-shadow: 0 0 20px rgba(255,0,144,0.55); transform: translateY(-1px); }
+
+  /* EMPTY */
+  .empty { text-align: center; padding: 80px 20px; color: var(--muted); display: none; }
+  .empty.show { display: block; }
+  .empty-icon { font-size: 3.5rem; display: block; margin-bottom: 18px; opacity: 0.5; }
+  .empty h3 { font-family: 'Orbitron', monospace; font-size: 0.9rem; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 10px; }
+
+  /* OVERLAY / MODAL */
+  .overlay { display: none; position: fixed; inset: 0; z-index: 900; background: rgba(0,0,5,0.88); backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 20px; }
+  .overlay.open { display: flex; }
+  .modal { background: var(--surface); border: 1px solid var(--border2); box-shadow: 0 0 60px rgba(0,240,255,0.15), 0 0 120px rgba(0,0,0,0.8); width: 100%; max-width: 560px; max-height: 92vh; overflow-y: auto; animation: modalPop 0.22s ease; }
+  @keyframes modalPop { from { opacity:0; transform:scale(0.96) translateY(18px); } to { opacity:1; transform:scale(1) translateY(0); } }
+  .modal-head { padding: 22px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; background: var(--surface); z-index: 2; }
+  .modal-head-title { font-family: 'Orbitron', monospace; font-size: 0.85rem; font-weight: 700; letter-spacing: 4px; text-transform: uppercase; color: var(--cyan); text-shadow: 0 0 14px rgba(0,240,255,0.4); }
+  .modal-x { background: none; border: 1px solid var(--border2); color: var(--muted2); cursor: pointer; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; transition: all 0.15s; }
+  .modal-x:hover { border-color: var(--pink); color: var(--pink); }
+  .modal-body { padding: 24px; }
+
+  /* FORM */
+  .form-group { margin-bottom: 18px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-label { display: block; font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; letter-spacing: 3px; text-transform: uppercase; color: var(--muted2); margin-bottom: 7px; }
+  .req { color: var(--pink); margin-left: 3px; }
+  .form-input, .form-textarea, .form-select { width: 100%; background: var(--bg); border: 1px solid var(--border2); color: var(--text); padding: 11px 14px; font-family: 'Rajdhani', sans-serif; font-size: 0.95rem; outline: none; transition: border-color 0.15s, box-shadow 0.15s; -webkit-appearance: none; }
+  .form-input:focus, .form-textarea:focus, .form-select:focus { border-color: var(--cyan); box-shadow: 0 0 14px rgba(0,240,255,0.1); }
+  .form-textarea { resize: vertical; min-height: 90px; line-height: 1.5; }
+  .form-select option { background: #0a0a1c; }
+  .form-hint { font-family: 'Share Tech Mono', monospace; font-size: 0.6rem; color: var(--muted); margin-top: 5px; letter-spacing: 1px; }
+  .form-actions { display: flex; justify-content: flex-end; gap: 10px; padding-top: 18px; border-top: 1px solid var(--border); margin-top: 4px; }
+
+  /* EMOJI + COLOR */
+  .emoji-grid { display: grid; grid-template-columns: repeat(9,1fr); gap: 6px; margin-top: 6px; }
+  .e-opt { aspect-ratio:1; font-size:1.4rem; display:flex; align-items:center; justify-content:center; background:var(--bg); border:1px solid var(--border2); cursor:pointer; transition:all 0.15s; user-select:none; }
+  .e-opt:hover { border-color:var(--pink); transform:scale(1.1); }
+  .e-opt.picked { border-color:var(--pink); background:rgba(255,0,144,0.1); box-shadow:0 0 10px rgba(255,0,144,0.3); }
+  .swatches { display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
+  .swatch { width:28px; height:28px; border:2px solid transparent; cursor:pointer; transition:all 0.15s; }
+  .swatch:hover { transform:scale(1.15); }
+  .swatch.picked { border-color:#fff; box-shadow:0 0 10px rgba(255,255,255,0.4); }
+
+  /* LOGIN */
+  .login-modal { max-width: 380px; }
+  .login-logo { text-align:center; padding:28px 24px 0; font-family:'Orbitron',monospace; font-weight:900; font-size:1.1rem; letter-spacing:5px; color:var(--cyan); text-shadow:0 0 20px var(--cyan); }
+  .login-sub { text-align:center; font-family:'Share Tech Mono',monospace; font-size:0.65rem; letter-spacing:3px; color:var(--muted2); margin:8px 0 0; text-transform:uppercase; }
+  .login-error { background:rgba(255,68,102,0.1); border:1px solid rgba(255,68,102,0.4); color:#ff4466; font-family:'Share Tech Mono',monospace; font-size:0.68rem; letter-spacing:1px; padding:10px 14px; margin-bottom:14px; display:none; }
+  .login-error.show { display:block; }
+
+  /* ADMIN BAR */
+  .admin-bar { position:fixed; bottom:0; left:0; right:0; z-index:300; background:rgba(4,4,14,0.97); border-top:1px solid var(--cyan); box-shadow:0 -4px 30px rgba(0,240,255,0.15); display:none; }
+  .admin-bar.on { display:block; }
+  .admin-bar-inner { display:flex; align-items:center; justify-content:space-between; padding:10px 28px; max-width:1180px; margin:0 auto; gap:12px; flex-wrap:wrap; }
+  .admin-label { font-family:'Share Tech Mono',monospace; font-size:0.65rem; letter-spacing:3px; color:var(--cyan); text-transform:uppercase; }
+  .admin-label::before { content:'⚙ '; }
+  .admin-actions { display:flex; gap:8px; flex-wrap:wrap; }
+
+  /* ADMIN LIST */
+  .admin-list { display:flex; flex-direction:column; }
+  .a-row { display:flex; align-items:center; gap:14px; padding:14px 0; border-bottom:1px solid var(--border); }
+  .a-row:last-child { border-bottom:none; }
+  .a-emoji { font-size:1.6rem; flex-shrink:0; width:40px; text-align:center; }
+  .a-info { flex:1; min-width:0; }
+  .a-title { font-family:'Orbitron',monospace; font-size:0.78rem; color:#fff; font-weight:700; letter-spacing:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .a-meta { font-family:'Share Tech Mono',monospace; font-size:0.6rem; color:var(--muted2); margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .a-btns { display:flex; gap:6px; flex-shrink:0; }
+
+  /* EXPORT BOX */
+  .export-box { background:var(--bg); border:1px solid var(--green); padding:18px; margin-top:20px; }
+  .export-box-title { font-family:'Orbitron',monospace; font-size:0.75rem; letter-spacing:3px; color:var(--green); text-shadow:0 0 10px rgba(0,255,153,0.4); margin-bottom:10px; text-transform:uppercase; }
+  .export-steps { list-style:none; counter-reset:steps; }
+  .export-steps li { counter-increment:steps; font-family:'Share Tech Mono',monospace; font-size:0.68rem; letter-spacing:1px; color:var(--muted2); padding:6px 0 6px 28px; position:relative; line-height:1.6; border-bottom:1px solid var(--border); }
+  .export-steps li:last-child { border-bottom:none; }
+  .export-steps li::before { content:counter(steps); position:absolute; left:0; top:6px; background:var(--green); color:#000; font-weight:700; width:18px; height:18px; display:flex; align-items:center; justify-content:center; font-size:0.6rem; }
+  .export-steps li b { color:var(--green); }
+
+  /* CHANGE PW */
+  .section-divider { margin:22px 0; border-top:1px solid var(--border); }
+  .section-label { font-family:'Orbitron',monospace; font-size:0.7rem; letter-spacing:3px; color:var(--muted2); text-transform:uppercase; margin-bottom:14px; }
+
+  /* CONFIRM */
+  .confirm-modal { max-width:380px; }
+  .confirm-msg { font-size:0.95rem; color:var(--muted2); line-height:1.7; margin-bottom:8px; }
+  .confirm-name { font-family:'Orbitron',monospace; font-size:0.85rem; color:var(--pink); margin-bottom:20px; }
+
+  /* TOAST */
+  .toast { position:fixed; bottom:72px; right:24px; z-index:9999; font-family:'Share Tech Mono',monospace; font-size:0.68rem; letter-spacing:2px; padding:12px 22px; background:var(--surface); border:1px solid var(--green); color:var(--green); text-transform:uppercase; clip-path:polygon(10px 0%,100% 0%,calc(100% - 10px) 100%,0% 100%); transform:translateY(30px); opacity:0; transition:all 0.25s; pointer-events:none; }
+  .toast.show { transform:translateY(0); opacity:1; }
+
+  ::-webkit-scrollbar { width:5px; }
+  ::-webkit-scrollbar-track { background:var(--bg); }
+  ::-webkit-scrollbar-thumb { background:var(--border2); }
+  ::-webkit-scrollbar-thumb:hover { background:var(--cyan); }
+
+  @media(max-width:600px) {
+    .form-row { grid-template-columns:1fr; }
+    .emoji-grid { grid-template-columns:repeat(7,1fr); }
+    .hero h1 { font-size:2.2rem; }
+    .admin-bar-inner { padding:10px 16px; }
+    .top-bar { flex-direction:column; align-items:flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="bg-glow"></div>
+<div class="scanlines"></div>
+
+<!-- HEADER -->
+<header>
+  <div class="wrap">
+    <div class="header-inner">
+      <span class="site-logo" id="siteLogo">MY AR<span class="acc">CADE</span></span>
+      <button class="btn btn-cyan" id="adminBtn" onclick="openLogin()">⚙ MANAGE</button>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="wrap">
+  <section class="hero">
+    <div class="hero-eyebrow">Select a game and press start</div>
+    <h1>
+      <span class="l1">WELCOME TO</span>
+      <span class="l2" id="heroTitle">MY ARCADE</span>
+    </h1>
+    <p class="hero-sub" id="heroSub">A collection of games built from scratch. Pick one and start playing!</p>
+  </section>
+
+  <!-- UPDATE BANNER -->
+  <div id="updateBanner" style="display:none;">
+    <div class="update-banner">
+      <div class="update-banner-inner">
+        <div class="update-dot"></div>
+        <div class="update-content">
+          <div class="update-label">Update</div>
+          <div class="update-text" id="updateText"></div>
+        </div>
+      </div>
+      <button class="update-close" onclick="dismissUpdate()" title="Dismiss">✕</button>
+    </div>
+  </div>
+
+  <section class="section">
+    <div class="top-bar">
+      <div class="game-count"><span id="countNum">5</span> GAMES AVAILABLE</div>
+      <div class="filters" id="filterBar"><button class="chip active" onclick="setFilter('all',this)">All</button><button class="chip " onclick="setFilter('Other',this)">Other</button><button class="chip " onclick="setFilter('RPG',this)">RPG</button><button class="chip " onclick="setFilter('Strategy',this)">Strategy</button></div>
+    </div>
+    <div class="game-grid" id="gameGrid">
+    <div class="card" style="animation-delay:0s">
+      <div class="card-stripe"></div>
+      <div class="card-art" style="--gc:#ffe600">
+        <div class="card-art-glow"></div>
+        <span class="card-art-emoji">🌀</span>
+      </div>
+      <div class="card-body">
+        <div class="card-genre" style="color:#ffe600">Other</div>
+        <h3 class="card-title">Category Dash</h3>
+        <p class="card-desc">BGAPTT</p>
+        <div class="card-footer">
+          <span class="card-by">by MY ARCADE</span>
+          <a class="play-btn" href="https://ks9419.github.io/Category-Dash/" target="_blank" rel="noopener noreferrer">PLAY ▶</a>
+        </div>
+      </div>
+    </div>
+  
+    <div class="card" style="animation-delay:0.07s">
+      <div class="card-stripe"></div>
+      <div class="card-art" style="--gc:#00f0ff">
+        <div class="card-art-glow"></div>
+        <span class="card-art-emoji">🎲</span>
+      </div>
+      <div class="card-body">
+        <div class="card-genre" style="color:#00f0ff">Strategy</div>
+        <h3 class="card-title">Slider Puzzle</h3>
+        <p class="card-desc">Sliding tiles. Play and win. Have fun!!!</p>
+        <div class="card-footer">
+          <span class="card-by">by MY ARCADE</span>
+          <a class="play-btn" href="https://ks9419.github.io/Sliding-Puzzle/" target="_blank" rel="noopener noreferrer">PLAY ▶</a>
+        </div>
+      </div>
+    </div>
+  
+    <div class="card" style="animation-delay:0.14s">
+      <div class="card-stripe"></div>
+      <div class="card-art" style="--gc:#00ff99">
+        <div class="card-art-glow"></div>
+        <span class="card-art-emoji">⚔️</span>
+      </div>
+      <div class="card-body">
+        <div class="card-genre" style="color:#00ff99">Strategy</div>
+        <h3 class="card-title">Mega Tic-tac-toe Online</h3>
+        <p class="card-desc">Not your regular old basic tic tac toe</p>
+        <div class="card-footer">
+          <span class="card-by">by MY ARCADE</span>
+          <a class="play-btn" href="https://ks9419.github.io/Mega-Tic-tac-toe-Online/" target="_blank" rel="noopener noreferrer">PLAY ▶</a>
+        </div>
+      </div>
+    </div>
+  
+    <div class="card" style="animation-delay:0.21000000000000002s">
+      <div class="card-stripe"></div>
+      <div class="card-art" style="--gc:#66ff33">
+        <div class="card-art-glow"></div>
+        <span class="card-art-emoji">🎯</span>
+      </div>
+      <div class="card-body">
+        <div class="card-genre" style="color:#66ff33">Other</div>
+        <h3 class="card-title">Survival of the Smartest</h3>
+        <p class="card-desc">Hangman with a twist. It's still a work in process. Message me with ideas</p>
+        <div class="card-footer">
+          <span class="card-by">by MY ARCADE</span>
+          <a class="play-btn" href="https://ks9419.github.io/Survival-of-the-Smartest/" target="_blank" rel="noopener noreferrer">PLAY ▶</a>
+        </div>
+      </div>
+    </div>
+  
+    <div class="card" style="animation-delay:0.28s">
+      <div class="card-stripe"></div>
+      <div class="card-art" style="--gc:#ff3366">
+        <div class="card-art-glow"></div>
+        <span class="card-art-emoji">🏰</span>
+      </div>
+      <div class="card-body">
+        <div class="card-genre" style="color:#ff3366">RPG</div>
+        <h3 class="card-title">The Dark Realm</h3>
+        <p class="card-desc">DNDish styled game</p>
+        <div class="card-footer">
+          <span class="card-by">by MY ARCADE</span>
+          <a class="play-btn" href="https://ks9419.github.io/The-Dark-Realm-AI-Dungeon-Master/" target="_blank" rel="noopener noreferrer">PLAY ▶</a>
+        </div>
+      </div>
+    </div>
+  </div>
+    <div class="empty" id="emptyState">
+      <span class="empty-icon">🕹️</span>
+      <h3>No Games Yet</h3>
+      <p style="font-size:0.85rem;">The admin hasn't added any games yet.</p>
+    </div>
+  </section>
+</div>
+
+<!-- LOGIN -->
+<div class="overlay" id="loginOverlay">
+  <div class="modal login-modal">
+    <div class="login-logo">⚙ ADMIN</div>
+    <p class="login-sub">Restricted Access</p>
+    <div class="modal-body">
+      <div class="login-error" id="loginErr">Incorrect password.</div>
+      <div class="form-group">
+        <label class="form-label">Password <span class="req">*</span></label>
+        <input type="password" class="form-input" id="loginPw" placeholder="Enter admin password..." onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-ghost" onclick="closeOverlay('loginOverlay')">Cancel</button>
+        <button class="btn btn-cyan" onclick="doLogin()">ENTER →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div class="overlay" id="adminOverlay">
+  <div class="modal" style="max-width:640px;">
+    <div class="modal-head">
+      <span class="modal-head-title">Admin Panel</span>
+      <button class="modal-x" onclick="closeOverlay('adminOverlay')">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="form-group">
+        <label class="form-label">Site Title</label>
+        <input type="text" class="form-input" id="cfgTitle" placeholder="MY ARCADE">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Hero Subtitle</label>
+        <input type="text" class="form-input" id="cfgSub" placeholder="A collection of games I made...">
+      </div>
+
+      <div class="section-divider"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <span style="font-family:'Orbitron',monospace;font-size:0.78rem;letter-spacing:3px;color:var(--cyan);">YOUR GAMES</span>
+        <button class="btn btn-pink btn-sm" onclick="openAddGame()">+ ADD GAME</button>
+      </div>
+      <div class="admin-list" id="adminList">
+    <div class="a-row">
+      <div class="a-emoji">🌀</div>
+      <div class="a-info">
+        <div class="a-title">Category Dash</div>
+        <div class="a-meta">Other · ks9419.github.io/Category-Dash/</div>
+      </div>
+      <div class="a-btns">
+        <button class="btn btn-cyan btn-sm" onclick="openEditGame('wlsycku0gwmmgt3z5e')">EDIT</button>
+        <button class="btn btn-danger btn-sm" onclick="promptDelete('wlsycku0gwmmgt3z5e','Category Dash')">✕</button>
+      </div>
+    </div>
+  
+    <div class="a-row">
+      <div class="a-emoji">🎲</div>
+      <div class="a-info">
+        <div class="a-title">Slider Puzzle</div>
+        <div class="a-meta">Strategy · ks9419.github.io/Sliding-Puzzle/</div>
+      </div>
+      <div class="a-btns">
+        <button class="btn btn-cyan btn-sm" onclick="openEditGame('b3nonr98928mmgt5hx3')">EDIT</button>
+        <button class="btn btn-danger btn-sm" onclick="promptDelete('b3nonr98928mmgt5hx3','Slider Puzzle')">✕</button>
+      </div>
+    </div>
+  
+    <div class="a-row">
+      <div class="a-emoji">⚔️</div>
+      <div class="a-info">
+        <div class="a-title">Mega Tic-tac-toe Online</div>
+        <div class="a-meta">Strategy · ks9419.github.io/Mega-Tic-tac-toe-Online/</div>
+      </div>
+      <div class="a-btns">
+        <button class="btn btn-cyan btn-sm" onclick="openEditGame('g0w8h0wq19mmgt79iv')">EDIT</button>
+        <button class="btn btn-danger btn-sm" onclick="promptDelete('g0w8h0wq19mmgt79iv','Mega Tic-tac-toe Online')">✕</button>
+      </div>
+    </div>
+  
+    <div class="a-row">
+      <div class="a-emoji">🎯</div>
+      <div class="a-info">
+        <div class="a-title">Survival of the Smartest</div>
+        <div class="a-meta">Other · ks9419.github.io/Survival-of-the-Smartest/</div>
+      </div>
+      <div class="a-btns">
+        <button class="btn btn-cyan btn-sm" onclick="openEditGame('h8idcwysranmmgujpnw')">EDIT</button>
+        <button class="btn btn-danger btn-sm" onclick="promptDelete('h8idcwysranmmgujpnw','Survival of the Smartest')">✕</button>
+      </div>
+    </div>
+  
+    <div class="a-row">
+      <div class="a-emoji">🏰</div>
+      <div class="a-info">
+        <div class="a-title">The Dark Realm</div>
+        <div class="a-meta">RPG · ks9419.github.io/The-Dark-Realm-AI-Dungeon-Master/</div>
+      </div>
+      <div class="a-btns">
+        <button class="btn btn-cyan btn-sm" onclick="openEditGame('irqbefaxszmmh146vm')">EDIT</button>
+        <button class="btn btn-danger btn-sm" onclick="promptDelete('irqbefaxszmmh146vm','The Dark Realm')">✕</button>
+      </div>
+    </div>
+  </div>
+
+      <div class="section-divider"></div>
+      <div class="section-label">Change Password</div>
+      <div class="form-row">
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label">New Password</label>
+          <input type="password" class="form-input" id="pw1" placeholder="New password...">
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label">Confirm</label>
+          <input type="password" class="form-input" id="pw2" placeholder="Confirm...">
+        </div>
+      </div>
+      <div style="margin-top:12px;">
+        <button class="btn btn-cyan btn-sm" onclick="changePw()">UPDATE PASSWORD</button>
+      </div>
+
+      <!-- UPDATE MESSAGE -->
+      <div class="section-divider"></div>
+      <div class="section-label">Post an Update</div>
+      <div class="form-group">
+        <label class="form-label">Message</label>
+        <textarea class="form-textarea" id="updateMsg" placeholder="e.g. Just added a new game — check it out! Fixed a bug in Space Blaster." style="min-height:72px;"></textarea>
+        <div class="form-hint">Visitors see this once, then it's gone when they close it. Leave blank to show no update.</div>
+      </div>
+
+      <!-- EXPORT BOX -->
+      <div class="export-box" style="margin-top:24px;">
+        <div class="export-box-title">⬇ How to Publish Your Changes</div>
+        <ol class="export-steps">
+          <li>Click <b>"Export &amp; Download"</b> below — saves your updated site as <b>index.html</b></li>
+          <li>Go to your GitHub repo → click <b>index.html</b> → click the <b>pencil ✏️ edit icon</b></li>
+          <li>Delete all the old content, paste the new file contents, then click <b>Commit changes</b></li>
+          <li>Your live site updates in <b>~1 minute</b> — friends will see the new games!</li>
+        </ol>
+      </div>
+
+      <div class="form-actions" style="margin-top:20px;">
+        <button class="btn btn-ghost" onclick="closeOverlay('adminOverlay')">Close</button>
+        <button class="btn btn-green" onclick="saveSettingsOnly()">SAVE SETTINGS</button>
+        <button class="btn btn-yellow" onclick="exportAndDownload()">⬇ EXPORT &amp; DOWNLOAD</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD/EDIT GAME -->
+<div class="overlay" id="gameFormOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-head-title" id="gameFormHeading">Add Game</span>
+      <button class="modal-x" onclick="closeGameForm()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Game Title <span class="req">*</span></label>
+        <input type="text" class="form-input" id="fTitle" placeholder="e.g. Space Blaster" maxlength="60">
+      </div>
+      <div class="form-group">
+        <label class="form-label">GitHub Pages URL <span class="req">*</span></label>
+        <input type="url" class="form-input" id="fUrl" placeholder="https://yourusername.github.io/your-game/">
+        <div class="form-hint">Clicking PLAY will open this in a new tab</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description <span class="req">*</span></label>
+        <textarea class="form-textarea" id="fDesc" placeholder="What is this game? How do you play?"></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Genre <span class="req">*</span></label>
+          <select class="form-select" id="fGenre">
+            <option value="">Select...</option>
+            <option>Action</option><option>Arcade</option><option>Horror</option>
+            <option>Platformer</option><option>Puzzle</option><option>RPG</option>
+            <option>Shooter</option><option>Simulation</option><option>Strategy</option><option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Glow Color</label>
+          <div class="swatches" id="colorSwatches"><div class="swatch" style="background:#00f0ff" onclick="pickColor('#00f0ff',this)"></div><div class="swatch" style="background:#ff0090" onclick="pickColor('#ff0090',this)"></div><div class="swatch" style="background:#ffe600" onclick="pickColor('#ffe600',this)"></div><div class="swatch" style="background:#00ff99" onclick="pickColor('#00ff99',this)"></div><div class="swatch" style="background:#9966ff" onclick="pickColor('#9966ff',this)"></div><div class="swatch" style="background:#ff6600" onclick="pickColor('#ff6600',this)"></div><div class="swatch picked" style="background:#ff3366" onclick="pickColor('#ff3366',this)"></div><div class="swatch" style="background:#33ccff" onclick="pickColor('#33ccff',this)"></div><div class="swatch" style="background:#66ff33" onclick="pickColor('#66ff33',this)"></div><div class="swatch" style="background:#ff99ff" onclick="pickColor('#ff99ff',this)"></div></div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Icon</label>
+        <div class="emoji-grid" id="emojiGrid"><div class="e-opt" onclick="pickEmoji('🎮',this)">🎮</div><div class="e-opt" onclick="pickEmoji('🕹️',this)">🕹️</div><div class="e-opt" onclick="pickEmoji('⚔️',this)">⚔️</div><div class="e-opt" onclick="pickEmoji('🛸',this)">🛸</div><div class="e-opt picked" onclick="pickEmoji('🏰',this)">🏰</div><div class="e-opt" onclick="pickEmoji('🐉',this)">🐉</div><div class="e-opt" onclick="pickEmoji('💣',this)">💣</div><div class="e-opt" onclick="pickEmoji('🚀',this)">🚀</div><div class="e-opt" onclick="pickEmoji('🌌',this)">🌌</div><div class="e-opt" onclick="pickEmoji('🎯',this)">🎯</div><div class="e-opt" onclick="pickEmoji('🔮',this)">🔮</div><div class="e-opt" onclick="pickEmoji('🧙',this)">🧙</div><div class="e-opt" onclick="pickEmoji('🦊',this)">🦊</div><div class="e-opt" onclick="pickEmoji('🤖',this)">🤖</div><div class="e-opt" onclick="pickEmoji('👾',this)">👾</div><div class="e-opt" onclick="pickEmoji('🎃',this)">🎃</div><div class="e-opt" onclick="pickEmoji('🌊',this)">🌊</div><div class="e-opt" onclick="pickEmoji('🔥',this)">🔥</div><div class="e-opt" onclick="pickEmoji('⚡',this)">⚡</div><div class="e-opt" onclick="pickEmoji('🏆',this)">🏆</div><div class="e-opt" onclick="pickEmoji('🎲',this)">🎲</div><div class="e-opt" onclick="pickEmoji('🌀',this)">🌀</div><div class="e-opt" onclick="pickEmoji('💫',this)">💫</div><div class="e-opt" onclick="pickEmoji('🧩',this)">🧩</div><div class="e-opt" onclick="pickEmoji('🦅',this)">🦅</div><div class="e-opt" onclick="pickEmoji('🐺',this)">🐺</div><div class="e-opt" onclick="pickEmoji('💀',this)">💀</div><div class="e-opt" onclick="pickEmoji('🌙',this)">🌙</div><div class="e-opt" onclick="pickEmoji('🎪',this)">🎪</div><div class="e-opt" onclick="pickEmoji('🎨',this)">🎨</div><div class="e-opt" onclick="pickEmoji('🏄',this)">🏄</div><div class="e-opt" onclick="pickEmoji('🧲',this)">🧲</div></div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-ghost" onclick="closeGameForm()">Cancel</button>
+        <button class="btn btn-pink" onclick="saveGame()">SAVE GAME →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM DELETE -->
+<div class="overlay" id="confirmOverlay">
+  <div class="modal confirm-modal">
+    <div class="modal-head">
+      <span class="modal-head-title">Confirm Delete</span>
+      <button class="modal-x" onclick="closeOverlay('confirmOverlay');openAdmin()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="confirm-msg">Remove this game from your arcade?</p>
+      <p class="confirm-name" id="confirmName">Warmongers</p>
+      <div class="form-actions">
+        <button class="btn btn-ghost" onclick="closeOverlay('confirmOverlay');openAdmin()">Cancel</button>
+        <button class="btn btn-danger" onclick="doDelete()">DELETE</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN BAR -->
+<div class="admin-bar" id="adminBar">
+  <div class="admin-bar-inner">
+    <span class="admin-label">Admin Mode</span>
+    <div class="admin-actions">
+      <button class="btn btn-pink btn-sm" onclick="openAddGame()">+ ADD GAME</button>
+      <button class="btn btn-cyan btn-sm" onclick="openAdmin()">MANAGE</button>
+      <button class="btn btn-yellow btn-sm" onclick="exportAndDownload()">⬇ EXPORT</button>
+      <button class="btn btn-ghost btn-sm" onclick="logout()">LOGOUT</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" style="border-color: var(--green); color: var(--green);">Game removed — export to publish!</div>
+
+<script>
+// ─────────────────────────────────────────────
+//  EMBEDDED DATA — edited by export workflow
+// ─────────────────────────────────────────────
+const SITE_DATA = {
+  "password": "RajS1994!",
+  "siteTitle": "MY ARCADE",
+  "subtitle": "A collection of games built from scratch. Pick one and start playing!",
+  "games": [
+    {
+      "id": "wlsycku0gwmmgt3z5e",
+      "title": "Category Dash",
+      "url": "https://ks9419.github.io/Category-Dash/",
+      "desc": "BGAPTT",
+      "genre": "Other",
+      "emoji": "🌀",
+      "color": "#ffe600"
+    },
+    {
+      "id": "b3nonr98928mmgt5hx3",
+      "title": "Slider Puzzle",
+      "url": "https://ks9419.github.io/Sliding-Puzzle/",
+      "desc": "Sliding tiles. Play and win. Have fun!!!",
+      "genre": "Strategy",
+      "emoji": "🎲",
+      "color": "#00f0ff"
+    },
+    {
+      "id": "g0w8h0wq19mmgt79iv",
+      "title": "Mega Tic-tac-toe Online",
+      "url": "https://ks9419.github.io/Mega-Tic-tac-toe-Online/",
+      "desc": "Not your regular old basic tic tac toe",
+      "genre": "Strategy",
+      "emoji": "⚔️",
+      "color": "#00ff99"
+    },
+    {
+      "id": "h8idcwysranmmgujpnw",
+      "title": "Survival of the Smartest",
+      "url": "https://ks9419.github.io/Survival-of-the-Smartest/",
+      "desc": "Hangman with a twist. It's still a work in process. Message me with ideas",
+      "genre": "Other",
+      "emoji": "🎯",
+      "color": "#66ff33"
+    },
+    {
+      "id": "irqbefaxszmmh146vm",
+      "title": "The Dark Realm",
+      "url": "https://ks9419.github.io/The-Dark-Realm-AI-Dungeon-Master/",
+      "desc": "DNDish styled game",
+      "genre": "RPG",
+      "emoji": "🏰",
+      "color": "#ff3366"
+    }
+  ],
+  "update": { "id": "", "message": "" }
+};
+
+// ─────────────────────────────────────────────
+//  CONSTANTS
+// ─────────────────────────────────────────────
+const EMOJIS = ['🎮','🕹️','⚔️','🛸','🏰','🐉','💣','🚀','🌌','🎯','🔮','🧙','🦊','🤖','👾','🎃','🌊','🔥','⚡','🏆','🎲','🌀','💫','🧩','🦅','🐺','💀','🌙','🎪','🎨','🏄','🧲'];
+const COLORS  = ['#00f0ff','#ff0090','#ffe600','#00ff99','#9966ff','#ff6600','#ff3366','#33ccff','#66ff33','#ff99ff'];
+
+// ─────────────────────────────────────────────
+//  STATE  (runtime only — lives in memory)
+// ─────────────────────────────────────────────
+let S = JSON.parse(JSON.stringify(SITE_DATA)); // deep copy so we can edit
+let isAdmin = false;
+let activeFilter = 'all';
+let pickedEmoji  = '🎮';
+let pickedColor  = '#00f0ff';
+let editingId    = null;
+let deleteId     = null;
+
+// ─────────────────────────────────────────────
+//  RENDER
+// ─────────────────────────────────────────────
+function render() {
+  // meta
+  const t = S.siteTitle || 'MY ARCADE';
+  const half = Math.ceil(t.length / 2);
+  document.getElementById('siteLogo').innerHTML   = t.slice(0,half) + '<span class="acc">' + t.slice(half) + '</span>';
+  document.getElementById('heroTitle').textContent = t;
+  document.getElementById('heroSub').textContent   = S.subtitle || '';
+  document.title = t;
+
+  // update banner — show only if there's a message and it hasn't been dismissed
+  const upd = S.update || {};
+  const banner = document.getElementById('updateBanner');
+  if (upd.id && upd.message) {
+    const dismissed = localStorage.getItem('dismissed_update_' + upd.id);
+    if (!dismissed) {
+      document.getElementById('updateText').textContent = upd.message;
+      banner.style.display = 'block';
+    } else {
+      banner.style.display = 'none';
+    }
+  } else {
+    banner.style.display = 'none';
+  }
+
+  // filters
+  const genres = [...new Set(S.games.map(g => g.genre).filter(Boolean))].sort();
+  const fb = document.getElementById('filterBar');
+  fb.innerHTML = `<button class="chip ${activeFilter==='all'?'active':''}" onclick="setFilter('all',this)">All</button>`;
+  genres.forEach(g => {
+    fb.innerHTML += `<button class="chip ${activeFilter===g?'active':''}" onclick="setFilter('${eA(g)}',this)">${eH(g)}</button>`;
+  });
+
+  // grid
+  const filtered = activeFilter === 'all' ? S.games : S.games.filter(g => g.genre === activeFilter);
+  document.getElementById('countNum').textContent = S.games.length;
+  const grid  = document.getElementById('gameGrid');
+  const empty = document.getElementById('emptyState');
+
+  if (filtered.length === 0) { grid.innerHTML=''; empty.classList.add('show'); return; }
+  empty.classList.remove('show');
+
+  grid.innerHTML = filtered.map((g,i) => `
+    <div class="card" style="animation-delay:${i*0.07}s">
+      <div class="card-stripe"></div>
+      <div class="card-art" style="--gc:${g.color||'#00f0ff'}">
+        <div class="card-art-glow"></div>
+        <span class="card-art-emoji">${g.emoji||'🎮'}</span>
+      </div>
+      <div class="card-body">
+        <div class="card-genre" style="color:${g.color||'#00f0ff'}">${eH(g.genre||'')}</div>
+        <h3 class="card-title">${eH(g.title)}</h3>
+        <p class="card-desc">${eH(g.desc||'')}</p>
+        <div class="card-footer">
+          <span class="card-by">by ${eH(S.siteTitle||'You')}</span>
+          <a class="play-btn" href="${eA(g.url)}" target="_blank" rel="noopener noreferrer">PLAY ▶</a>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderAdminList() {
+  const el = document.getElementById('adminList');
+  if (!S.games.length) {
+    el.innerHTML = '<p style="font-family:\'Share Tech Mono\',monospace;font-size:0.7rem;color:var(--muted);letter-spacing:2px;padding:14px 0;">NO GAMES YET — ADD YOUR FIRST GAME ABOVE</p>';
+    return;
+  }
+  el.innerHTML = S.games.map(g => `
+    <div class="a-row">
+      <div class="a-emoji">${g.emoji||'🎮'}</div>
+      <div class="a-info">
+        <div class="a-title">${eH(g.title)}</div>
+        <div class="a-meta">${eH(g.genre||'')} · ${eH((g.url||'').replace('https://',''))}</div>
+      </div>
+      <div class="a-btns">
+        <button class="btn btn-cyan btn-sm" onclick="openEditGame('${g.id}')">EDIT</button>
+        <button class="btn btn-danger btn-sm" onclick="promptDelete('${g.id}','${eA(g.title)}')">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ─────────────────────────────────────────────
+//  FILTER
+// ─────────────────────────────────────────────
+function setFilter(genre, el) {
+  activeFilter = genre;
+  document.querySelectorAll('.chip').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+
+// ─────────────────────────────────────────────
+//  AUTH
+// ─────────────────────────────────────────────
+function openLogin() {
+  if (isAdmin) { openAdmin(); return; }
+  document.getElementById('loginPw').value = '';
+  document.getElementById('loginErr').classList.remove('show');
+  document.getElementById('loginOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('loginPw').focus(), 80);
+}
+
+function doLogin() {
+  if (document.getElementById('loginPw').value === S.password) {
+    isAdmin = true;
+    closeOverlay('loginOverlay');
+    document.getElementById('adminBar').classList.add('on');
+    document.getElementById('adminBtn').textContent = '⚙ MANAGE';
+    showToast('✓ Admin access granted');
+    openAdmin();
+  } else {
+    document.getElementById('loginErr').classList.add('show');
+    document.getElementById('loginPw').value = '';
+  }
+}
+
+function logout() {
+  isAdmin = false;
+  document.getElementById('adminBar').classList.remove('on');
+  document.getElementById('adminBtn').textContent = '⚙ ADMIN';
+  showToast('Logged out');
+}
+
+// ─────────────────────────────────────────────
+//  ADMIN PANEL
+// ─────────────────────────────────────────────
+function openAdmin() {
+  document.getElementById('cfgTitle').value = S.siteTitle || '';
+  document.getElementById('cfgSub').value   = S.subtitle  || '';
+  document.getElementById('updateMsg').value = (S.update && S.update.message) || '';
+  document.getElementById('pw1').value = '';
+  document.getElementById('pw2').value = '';
+  renderAdminList();
+  document.getElementById('adminOverlay').classList.add('open');
+}
+
+function saveSettingsOnly() {
+  const t = document.getElementById('cfgTitle').value.trim();
+  if (!t) { showToast('⚠ Title cannot be empty', '#ffee00'); return; }
+  S.siteTitle = t;
+  S.subtitle  = document.getElementById('cfgSub').value.trim();
+  const newMsg = document.getElementById('updateMsg').value.trim();
+  const oldMsg = (S.update && S.update.message) || '';
+  if (newMsg !== oldMsg) {
+    S.update = { id: newMsg ? uid() : '', message: newMsg };
+  }
+  render();
+  showToast('✓ Settings saved in memory — export to publish!');
+}
+
+function dismissUpdate() {
+  const upd = S.update || {};
+  if (upd.id) localStorage.setItem('dismissed_update_' + upd.id, '1');
+  document.getElementById('updateBanner').style.display = 'none';
+}
+
+function changePw() {
+  const p1 = document.getElementById('pw1').value;
+  const p2 = document.getElementById('pw2').value;
+  if (!p1)        { showToast('⚠ Enter a new password', '#ffee00'); return; }
+  if (p1 !== p2)  { showToast('⚠ Passwords do not match', '#ffee00'); return; }
+  if (p1.length < 4) { showToast('⚠ Min 4 characters', '#ffee00'); return; }
+  S.password = p1;
+  document.getElementById('pw1').value = '';
+  document.getElementById('pw2').value = '';
+  showToast('✓ Password updated — export to make permanent!');
+}
+
+// ─────────────────────────────────────────────
+//  GAME FORM
+// ─────────────────────────────────────────────
+function buildEmojiGrid() {
+  document.getElementById('emojiGrid').innerHTML = EMOJIS.map(e =>
+    `<div class="e-opt ${e===pickedEmoji?'picked':''}" onclick="pickEmoji('${e}',this)">${e}</div>`
+  ).join('');
+}
+function buildSwatches() {
+  document.getElementById('colorSwatches').innerHTML = COLORS.map(c =>
+    `<div class="swatch ${c===pickedColor?'picked':''}" style="background:${c}" onclick="pickColor('${c}',this)"></div>`
+  ).join('');
+}
+function pickEmoji(e, el) {
+  pickedEmoji = e;
+  document.querySelectorAll('.e-opt').forEach(x => x.classList.remove('picked'));
+  el.classList.add('picked');
+}
+function pickColor(c, el) {
+  pickedColor = c;
+  document.querySelectorAll('.swatch').forEach(x => x.classList.remove('picked'));
+  el.classList.add('picked');
+}
+
+function openAddGame() {
+  editingId   = null;
+  pickedEmoji = '🎮';
+  pickedColor = '#00f0ff';
+  document.getElementById('gameFormHeading').textContent = 'Add Game';
+  ['fTitle','fUrl','fDesc'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('fGenre').value = '';
+  buildEmojiGrid(); buildSwatches();
+  closeOverlay('adminOverlay');
+  document.getElementById('gameFormOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('fTitle').focus(), 80);
+}
+
+function openEditGame(id) {
+  const g = S.games.find(x => x.id === id);
+  if (!g) return;
+  editingId   = id;
+  pickedEmoji = g.emoji || '🎮';
+  pickedColor = g.color || '#00f0ff';
+  document.getElementById('gameFormHeading').textContent = 'Edit Game';
+  document.getElementById('fTitle').value  = g.title || '';
+  document.getElementById('fUrl').value    = g.url   || '';
+  document.getElementById('fDesc').value   = g.desc  || '';
+  document.getElementById('fGenre').value  = g.genre || '';
+  buildEmojiGrid(); buildSwatches();
+  closeOverlay('adminOverlay');
+  document.getElementById('gameFormOverlay').classList.add('open');
+}
+
+function closeGameForm() {
+  closeOverlay('gameFormOverlay');
+  if (isAdmin) openAdmin();
+}
+
+function saveGame() {
+  const title = document.getElementById('fTitle').value.trim();
+  const url   = document.getElementById('fUrl').value.trim();
+  const desc  = document.getElementById('fDesc').value.trim();
+  const genre = document.getElementById('fGenre').value;
+  if (!title || !url || !desc || !genre) { showToast('⚠ Fill all required fields', '#ffee00'); return; }
+  if (!url.startsWith('http'))           { showToast('⚠ URL must start with https://', '#ffee00'); return; }
+
+  if (editingId) {
+    const i = S.games.findIndex(g => g.id === editingId);
+    if (i > -1) S.games[i] = { ...S.games[i], title, url, desc, genre, emoji: pickedEmoji, color: pickedColor };
+    showToast('✓ Game updated — export to publish!');
+  } else {
+    S.games.push({ id: uid(), title, url, desc, genre, emoji: pickedEmoji, color: pickedColor });
+    showToast('✓ Game added — export to publish!');
+  }
+  render();
+  closeGameForm();
+}
+
+// ─────────────────────────────────────────────
+//  DELETE
+// ─────────────────────────────────────────────
+function promptDelete(id, name) {
+  deleteId = id;
+  document.getElementById('confirmName').textContent = name;
+  closeOverlay('adminOverlay');
+  document.getElementById('confirmOverlay').classList.add('open');
+}
+function doDelete() {
+  S.games = S.games.filter(g => g.id !== deleteId);
+  render();
+  closeOverlay('confirmOverlay');
+  openAdmin();
+  showToast('Game removed — export to publish!');
+}
+
+// ─────────────────────────────────────────────
+//  EXPORT & DOWNLOAD  ← the magic
+// ─────────────────────────────────────────────
+function exportAndDownload() {
+  // Apply any unsaved settings from the form fields if admin panel is open
+  const cfgT = document.getElementById('cfgTitle').value.trim();
+  const cfgS = document.getElementById('cfgSub').value.trim();
+  if (cfgT) S.siteTitle = cfgT;
+  if (cfgS) S.subtitle  = cfgS;
+
+  // Apply update message — assign new id only if message changed
+  const newMsg = document.getElementById('updateMsg').value.trim();
+  const oldMsg = (S.update && S.update.message) || '';
+  if (newMsg !== oldMsg) {
+    S.update = { id: newMsg ? uid() : '', message: newMsg };
+  }
+
+  // Close all overlays and admin bar before capturing so the exported
+  // file opens with nothing visible to visitors
+  document.querySelectorAll('.overlay').forEach(o => o.classList.remove('open'));
+  document.getElementById('adminBar').classList.remove('on');
+
+  // Grab current HTML source
+  const html = document.documentElement.outerHTML;
+
+  // Restore admin state after capture
+  document.getElementById('adminBar').classList.add('on');
+
+  // Replace the SITE_DATA object with current state
+  const newData = JSON.stringify(S, null, 2);
+  const updated = html.replace(
+    /const SITE_DATA = \{[\s\S]*?\};/,
+    `const SITE_DATA = ${newData};`
+  );
+
+  // Trigger download
+  const blob = new Blob([updated], { type: 'text/html' });
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
+  a.download = 'index.html';
+  a.click();
+  URL.revokeObjectURL(a.href);
+
+  showToast('⬇ Downloaded! Upload to GitHub to go live.', '#ffe600');
+}
+
+// ─────────────────────────────────────────────
+//  HELPERS
+// ─────────────────────────────────────────────
+function closeOverlay(id) { document.getElementById(id).classList.remove('open'); }
+function uid() { return Math.random().toString(36).slice(2) + Date.now().toString(36); }
+function eH(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function eA(s) { return String(s||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+let toastTimer;
+function showToast(msg, color) {
+  const t = document.getElementById('toast');
+  t.textContent   = msg;
+  t.style.borderColor = color || 'var(--green)';
+  t.style.color       = color || 'var(--green)';
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// Close modals on overlay click / Escape
+document.querySelectorAll('.overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) closeOverlay(o.id); });
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelectorAll('.overlay.open').forEach(o => closeOverlay(o.id));
+});
+
+// ─────────────────────────────────────────────
+//  INIT
+// ─────────────────────────────────────────────
+render();
+</script>
+
+
+</body></html>
